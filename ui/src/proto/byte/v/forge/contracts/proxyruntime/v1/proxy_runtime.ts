@@ -125,11 +125,16 @@ export enum ProxyIPFraudSignal {
 export enum ProxyIPFraudProviderKind {
   PROXY_IP_FRAUD_PROVIDER_KIND_UNSPECIFIED = "PROXY_IP_FRAUD_PROVIDER_KIND_UNSPECIFIED",
   PROXY_IP_FRAUD_PROVIDER_KIND_IPAPI = "PROXY_IP_FRAUD_PROVIDER_KIND_IPAPI",
-  PROXY_IP_FRAUD_PROVIDER_KIND_IPINFO = "PROXY_IP_FRAUD_PROVIDER_KIND_IPINFO",
-  PROXY_IP_FRAUD_PROVIDER_KIND_IP2LOCATION = "PROXY_IP_FRAUD_PROVIDER_KIND_IP2LOCATION",
-  PROXY_IP_FRAUD_PROVIDER_KIND_IP_API_COM = "PROXY_IP_FRAUD_PROVIDER_KIND_IP_API_COM",
   PROXY_IP_FRAUD_PROVIDER_KIND_IPQUALITYSCORE = "PROXY_IP_FRAUD_PROVIDER_KIND_IPQUALITYSCORE",
   PROXY_IP_FRAUD_PROVIDER_KIND_ABUSEIPDB = "PROXY_IP_FRAUD_PROVIDER_KIND_ABUSEIPDB",
+  UNRECOGNIZED = "UNRECOGNIZED",
+}
+
+export enum ProxyIPGeoProviderKind {
+  PROXY_IP_GEO_PROVIDER_KIND_UNSPECIFIED = "PROXY_IP_GEO_PROVIDER_KIND_UNSPECIFIED",
+  PROXY_IP_GEO_PROVIDER_KIND_IPINFO = "PROXY_IP_GEO_PROVIDER_KIND_IPINFO",
+  PROXY_IP_GEO_PROVIDER_KIND_IP2LOCATION = "PROXY_IP_GEO_PROVIDER_KIND_IP2LOCATION",
+  PROXY_IP_GEO_PROVIDER_KIND_IP_API_COM = "PROXY_IP_GEO_PROVIDER_KIND_IP_API_COM",
   UNRECOGNIZED = "UNRECOGNIZED",
 }
 
@@ -205,8 +210,6 @@ export interface ProxyProviderAccount {
   username: string;
   password_value: string;
   dynamic_provider_id: string;
-  rotating_concurrency_limit: number;
-  sticky_concurrency_limit: number;
 }
 
 export interface ProxyDynamicIPEndpointCandidate {
@@ -379,6 +382,7 @@ export interface ProxyIPFraudProviderSettings {
   api_key_secret_refs: SecretRef[];
   clear_api_keys: boolean;
   api_key_values: string[];
+  display_name: string;
 }
 
 export interface ProxyIPFraudProviderSettingsView {
@@ -388,12 +392,43 @@ export interface ProxyIPFraudProviderSettingsView {
   anonymous: boolean;
   api_key_configured: boolean;
   api_key_count: number;
+  display_name: string;
 }
 
 export interface ProxyIPFraudProviderDescriptor {
   provider_id: string;
   default_weight: number;
   kind: ProxyIPFraudProviderKind;
+  supports_anonymous: boolean;
+  supports_api_key: boolean;
+  display_name: string;
+}
+
+export interface ProxyIPGeoProviderSettings {
+  provider_id: string;
+  weight: number;
+  kind: ProxyIPGeoProviderKind;
+  anonymous: boolean;
+  api_key_secret_refs: SecretRef[];
+  clear_api_keys: boolean;
+  api_key_values: string[];
+  display_name: string;
+}
+
+export interface ProxyIPGeoProviderSettingsView {
+  provider_id: string;
+  weight: number;
+  kind: ProxyIPGeoProviderKind;
+  anonymous: boolean;
+  api_key_configured: boolean;
+  api_key_count: number;
+  display_name: string;
+}
+
+export interface ProxyIPGeoProviderDescriptor {
+  provider_id: string;
+  default_weight: number;
+  kind: ProxyIPGeoProviderKind;
   supports_anonymous: boolean;
   supports_api_key: boolean;
   display_name: string;
@@ -408,6 +443,8 @@ export interface ProxyDynamicIPProviderSettings {
   endpoints: ProxyDynamicIPEndpointSettings[];
   dynamic_provider_id: string;
   display_name: string;
+  rotating_concurrency_limit: number;
+  sticky_concurrency_limit: number;
 }
 
 export interface ProxyRuntimeCheckSettings {
@@ -463,6 +500,7 @@ export interface ProxyRuntimeSettings {
   check_settings: ProxyRuntimeCheckSettings | undefined;
   egress_profiles: EgressProfileSettings[];
   ingress_rules: ProxyIngressRuleSettings[];
+  ip_geo_providers: ProxyIPGeoProviderSettingsView[];
 }
 
 export interface ProxyRuntimePersistentSettings {
@@ -472,6 +510,7 @@ export interface ProxyRuntimePersistentSettings {
   check_settings: ProxyRuntimeCheckSettings | undefined;
   egress_profiles: EgressProfileSettings[];
   ingress_rules: ProxyIngressRuleSettings[];
+  ip_geo_providers: ProxyIPGeoProviderSettings[];
 }
 
 export interface EgressListener {
@@ -513,8 +552,6 @@ export interface UpsertProxyProviderAccountRequest {
   clear_password: boolean;
   password_value: string;
   dynamic_provider_id: string;
-  rotating_concurrency_limit: number;
-  sticky_concurrency_limit: number;
 }
 
 export interface UpsertProxyProviderAccountResponse {
@@ -616,6 +653,13 @@ export interface ListProxyIPFraudProvidersResponse {
   providers: ProxyIPFraudProviderDescriptor[];
 }
 
+export interface ListProxyIPGeoProvidersRequest {
+}
+
+export interface ListProxyIPGeoProvidersResponse {
+  providers: ProxyIPGeoProviderDescriptor[];
+}
+
 export interface UpdateProxyRuntimeSettingsRequest {
   edge_canary: ProxyEdgeCanarySettings | undefined;
   ip_fraud_providers: ProxyIPFraudProviderSettings[];
@@ -623,6 +667,7 @@ export interface UpdateProxyRuntimeSettingsRequest {
   check_settings: ProxyRuntimeCheckSettings | undefined;
   egress_profiles: EgressProfileSettings[];
   ingress_rules: ProxyIngressRuleSettings[];
+  ip_geo_providers: ProxyIPGeoProviderSettings[];
 }
 
 export interface UpdateProxyRuntimeSettingsResponse {

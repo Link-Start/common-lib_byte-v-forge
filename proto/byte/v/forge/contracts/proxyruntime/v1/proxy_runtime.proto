@@ -118,11 +118,19 @@ enum ProxyIPFraudProviderKind {
   reserved 1;
   reserved "PROXY_IP_FRAUD_PROVIDER_KIND_FFRAUD";
   PROXY_IP_FRAUD_PROVIDER_KIND_IPAPI = 2;
-  PROXY_IP_FRAUD_PROVIDER_KIND_IPINFO = 3;
-  PROXY_IP_FRAUD_PROVIDER_KIND_IP2LOCATION = 4;
-  PROXY_IP_FRAUD_PROVIDER_KIND_IP_API_COM = 5;
+  reserved 3 to 5;
+  reserved "PROXY_IP_FRAUD_PROVIDER_KIND_IPINFO", "PROXY_IP_FRAUD_PROVIDER_KIND_IP2LOCATION", "PROXY_IP_FRAUD_PROVIDER_KIND_IP_API_COM";
   PROXY_IP_FRAUD_PROVIDER_KIND_IPQUALITYSCORE = 6;
   PROXY_IP_FRAUD_PROVIDER_KIND_ABUSEIPDB = 7;
+}
+
+enum ProxyIPGeoProviderKind {
+  PROXY_IP_GEO_PROVIDER_KIND_UNSPECIFIED = 0;
+  reserved 1;
+  reserved "PROXY_IP_GEO_PROVIDER_KIND_IPAPI";
+  PROXY_IP_GEO_PROVIDER_KIND_IPINFO = 2;
+  PROXY_IP_GEO_PROVIDER_KIND_IP2LOCATION = 3;
+  PROXY_IP_GEO_PROVIDER_KIND_IP_API_COM = 4;
 }
 
 enum ProxyEdgeAccessRiskLevel {
@@ -184,8 +192,8 @@ message ProxyProviderDescriptor {
 }
 
 message ProxyProviderAccount {
-  reserved 6 to 12;
-  reserved "proxy_addr", "protocol", "default_region", "default_state", "default_city", "default_asn", "default_sticky_ttl";
+  reserved 6 to 12, 18, 19;
+  reserved "proxy_addr", "protocol", "default_region", "default_state", "default_city", "default_asn", "default_sticky_ttl", "rotating_concurrency_limit", "sticky_concurrency_limit";
 
   string account_id = 1;
   string provider_id = 2;
@@ -197,8 +205,6 @@ message ProxyProviderAccount {
   string username = 15;
   string password_value = 16;
   string dynamic_provider_id = 17;
-  uint32 rotating_concurrency_limit = 18;
-  uint32 sticky_concurrency_limit = 19;
 }
 
 message ProxyDynamicIPEndpointCandidate {
@@ -368,6 +374,7 @@ message ProxyIPFraudProviderSettings {
   repeated byte.v.forge.contracts.common.v1.SecretRef api_key_secret_refs = 6;
   bool clear_api_keys = 7;
   repeated string api_key_values = 8;
+  string display_name = 9;
 }
 
 message ProxyIPFraudProviderSettingsView {
@@ -379,12 +386,43 @@ message ProxyIPFraudProviderSettingsView {
   bool anonymous = 5;
   bool api_key_configured = 6;
   uint32 api_key_count = 7;
+  string display_name = 8;
 }
 
 message ProxyIPFraudProviderDescriptor {
   string provider_id = 1;
   uint32 default_weight = 2;
   ProxyIPFraudProviderKind kind = 3;
+  bool supports_anonymous = 4;
+  bool supports_api_key = 5;
+  string display_name = 6;
+}
+
+message ProxyIPGeoProviderSettings {
+  string provider_id = 1;
+  uint32 weight = 2;
+  ProxyIPGeoProviderKind kind = 3;
+  bool anonymous = 4;
+  repeated byte.v.forge.contracts.common.v1.SecretRef api_key_secret_refs = 5;
+  bool clear_api_keys = 6;
+  repeated string api_key_values = 7;
+  string display_name = 8;
+}
+
+message ProxyIPGeoProviderSettingsView {
+  string provider_id = 1;
+  uint32 weight = 2;
+  ProxyIPGeoProviderKind kind = 3;
+  bool anonymous = 4;
+  bool api_key_configured = 5;
+  uint32 api_key_count = 6;
+  string display_name = 7;
+}
+
+message ProxyIPGeoProviderDescriptor {
+  string provider_id = 1;
+  uint32 default_weight = 2;
+  ProxyIPGeoProviderKind kind = 3;
   bool supports_anonymous = 4;
   bool supports_api_key = 5;
   string display_name = 6;
@@ -405,6 +443,8 @@ message ProxyDynamicIPProviderSettings {
   repeated ProxyDynamicIPEndpointSettings endpoints = 2;
   string dynamic_provider_id = 4;
   string display_name = 5;
+  uint32 rotating_concurrency_limit = 6;
+  uint32 sticky_concurrency_limit = 7;
 }
 
 message ProxyRuntimeCheckSettings {
@@ -472,6 +512,7 @@ message ProxyRuntimeSettings {
   ProxyRuntimeCheckSettings check_settings = 4;
   repeated EgressProfileSettings egress_profiles = 5;
   repeated ProxyIngressRuleSettings ingress_rules = 6;
+  repeated ProxyIPGeoProviderSettingsView ip_geo_providers = 7;
 }
 
 message ProxyRuntimePersistentSettings {
@@ -481,6 +522,7 @@ message ProxyRuntimePersistentSettings {
   ProxyRuntimeCheckSettings check_settings = 4;
   repeated EgressProfileSettings egress_profiles = 5;
   repeated ProxyIngressRuleSettings ingress_rules = 6;
+  repeated ProxyIPGeoProviderSettings ip_geo_providers = 7;
 }
 
 message EgressListener {
@@ -499,8 +541,8 @@ message ListProxyProvidersResponse { repeated ProxyProviderDescriptor providers 
 message ListProxyProviderAccountsRequest {}
 message ListProxyProviderAccountsResponse { repeated ProxyProviderAccount accounts = 1; }
 message UpsertProxyProviderAccountRequest {
-  reserved 5 to 11;
-  reserved "proxy_addr", "protocol", "default_region", "default_state", "default_city", "default_asn", "default_sticky_ttl";
+  reserved 5 to 11, 17, 18;
+  reserved "proxy_addr", "protocol", "default_region", "default_state", "default_city", "default_asn", "default_sticky_ttl", "rotating_concurrency_limit", "sticky_concurrency_limit";
 
   string account_id = 1;
   string provider_id = 2;
@@ -511,8 +553,6 @@ message UpsertProxyProviderAccountRequest {
   bool clear_password = 14;
   string password_value = 15;
   string dynamic_provider_id = 16;
-  uint32 rotating_concurrency_limit = 17;
-  uint32 sticky_concurrency_limit = 18;
 }
 message UpsertProxyProviderAccountResponse { ProxyProviderAccount account = 1; }
 message DeleteProxyProviderAccountRequest { string account_id = 1; }
@@ -587,6 +627,8 @@ message GetProxyRuntimeSettingsRequest {}
 message GetProxyRuntimeSettingsResponse { ProxyRuntimeSettings settings = 1; }
 message ListProxyIPFraudProvidersRequest {}
 message ListProxyIPFraudProvidersResponse { repeated ProxyIPFraudProviderDescriptor providers = 1; }
+message ListProxyIPGeoProvidersRequest {}
+message ListProxyIPGeoProvidersResponse { repeated ProxyIPGeoProviderDescriptor providers = 1; }
 message UpdateProxyRuntimeSettingsRequest {
   ProxyEdgeCanarySettings edge_canary = 1;
   repeated ProxyIPFraudProviderSettings ip_fraud_providers = 2;
@@ -594,6 +636,7 @@ message UpdateProxyRuntimeSettingsRequest {
   ProxyRuntimeCheckSettings check_settings = 4;
   repeated EgressProfileSettings egress_profiles = 5;
   repeated ProxyIngressRuleSettings ingress_rules = 6;
+  repeated ProxyIPGeoProviderSettings ip_geo_providers = 7;
 }
 message UpdateProxyRuntimeSettingsResponse { ProxyRuntimeSettings settings = 1; }
 message UpdateProxyEgressProfilesRequest { repeated EgressProfileSettings egress_profiles = 1; }
@@ -615,6 +658,7 @@ service ProxyRuntimeService {
   rpc CheckProxyEdgeAccess(CheckProxyEdgeAccessRequest) returns (CheckProxyEdgeAccessResponse);
   rpc CheckProxyTargetConnectivity(CheckProxyTargetConnectivityRequest) returns (CheckProxyTargetConnectivityResponse);
   rpc ListProxyIPFraudProviders(ListProxyIPFraudProvidersRequest) returns (ListProxyIPFraudProvidersResponse);
+  rpc ListProxyIPGeoProviders(ListProxyIPGeoProvidersRequest) returns (ListProxyIPGeoProvidersResponse);
   rpc GetProxyRuntimeSettings(GetProxyRuntimeSettingsRequest) returns (GetProxyRuntimeSettingsResponse);
   rpc UpdateProxyRuntimeSettings(UpdateProxyRuntimeSettingsRequest) returns (UpdateProxyRuntimeSettingsResponse);
   rpc UpdateProxyEgressProfiles(UpdateProxyEgressProfilesRequest) returns (UpdateProxyEgressProfilesResponse);
