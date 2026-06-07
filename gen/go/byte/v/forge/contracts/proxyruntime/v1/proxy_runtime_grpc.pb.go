@@ -31,6 +31,7 @@ const (
 	ProxyRuntimeService_CheckProxyIPFraud_FullMethodName            = "/byte.v.forge.contracts.proxyruntime.v1.ProxyRuntimeService/CheckProxyIPFraud"
 	ProxyRuntimeService_CheckProxyEdgeAccess_FullMethodName         = "/byte.v.forge.contracts.proxyruntime.v1.ProxyRuntimeService/CheckProxyEdgeAccess"
 	ProxyRuntimeService_CheckProxyTargetConnectivity_FullMethodName = "/byte.v.forge.contracts.proxyruntime.v1.ProxyRuntimeService/CheckProxyTargetConnectivity"
+	ProxyRuntimeService_GetProxyExitCheckSnapshot_FullMethodName    = "/byte.v.forge.contracts.proxyruntime.v1.ProxyRuntimeService/GetProxyExitCheckSnapshot"
 	ProxyRuntimeService_ListProxyIPFraudProviders_FullMethodName    = "/byte.v.forge.contracts.proxyruntime.v1.ProxyRuntimeService/ListProxyIPFraudProviders"
 	ProxyRuntimeService_ListProxyIPGeoProviders_FullMethodName      = "/byte.v.forge.contracts.proxyruntime.v1.ProxyRuntimeService/ListProxyIPGeoProviders"
 	ProxyRuntimeService_GetProxyRuntimeSettings_FullMethodName      = "/byte.v.forge.contracts.proxyruntime.v1.ProxyRuntimeService/GetProxyRuntimeSettings"
@@ -55,6 +56,7 @@ type ProxyRuntimeServiceClient interface {
 	CheckProxyIPFraud(ctx context.Context, in *CheckProxyIPFraudRequest, opts ...grpc.CallOption) (*CheckProxyIPFraudResponse, error)
 	CheckProxyEdgeAccess(ctx context.Context, in *CheckProxyEdgeAccessRequest, opts ...grpc.CallOption) (*CheckProxyEdgeAccessResponse, error)
 	CheckProxyTargetConnectivity(ctx context.Context, in *CheckProxyTargetConnectivityRequest, opts ...grpc.CallOption) (*CheckProxyTargetConnectivityResponse, error)
+	GetProxyExitCheckSnapshot(ctx context.Context, in *GetProxyExitCheckSnapshotRequest, opts ...grpc.CallOption) (*GetProxyExitCheckSnapshotResponse, error)
 	ListProxyIPFraudProviders(ctx context.Context, in *ListProxyIPFraudProvidersRequest, opts ...grpc.CallOption) (*ListProxyIPFraudProvidersResponse, error)
 	ListProxyIPGeoProviders(ctx context.Context, in *ListProxyIPGeoProvidersRequest, opts ...grpc.CallOption) (*ListProxyIPGeoProvidersResponse, error)
 	GetProxyRuntimeSettings(ctx context.Context, in *GetProxyRuntimeSettingsRequest, opts ...grpc.CallOption) (*GetProxyRuntimeSettingsResponse, error)
@@ -191,6 +193,16 @@ func (c *proxyRuntimeServiceClient) CheckProxyTargetConnectivity(ctx context.Con
 	return out, nil
 }
 
+func (c *proxyRuntimeServiceClient) GetProxyExitCheckSnapshot(ctx context.Context, in *GetProxyExitCheckSnapshotRequest, opts ...grpc.CallOption) (*GetProxyExitCheckSnapshotResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetProxyExitCheckSnapshotResponse)
+	err := c.cc.Invoke(ctx, ProxyRuntimeService_GetProxyExitCheckSnapshot_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *proxyRuntimeServiceClient) ListProxyIPFraudProviders(ctx context.Context, in *ListProxyIPFraudProvidersRequest, opts ...grpc.CallOption) (*ListProxyIPFraudProvidersResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ListProxyIPFraudProvidersResponse)
@@ -267,6 +279,7 @@ type ProxyRuntimeServiceServer interface {
 	CheckProxyIPFraud(context.Context, *CheckProxyIPFraudRequest) (*CheckProxyIPFraudResponse, error)
 	CheckProxyEdgeAccess(context.Context, *CheckProxyEdgeAccessRequest) (*CheckProxyEdgeAccessResponse, error)
 	CheckProxyTargetConnectivity(context.Context, *CheckProxyTargetConnectivityRequest) (*CheckProxyTargetConnectivityResponse, error)
+	GetProxyExitCheckSnapshot(context.Context, *GetProxyExitCheckSnapshotRequest) (*GetProxyExitCheckSnapshotResponse, error)
 	ListProxyIPFraudProviders(context.Context, *ListProxyIPFraudProvidersRequest) (*ListProxyIPFraudProvidersResponse, error)
 	ListProxyIPGeoProviders(context.Context, *ListProxyIPGeoProvidersRequest) (*ListProxyIPGeoProvidersResponse, error)
 	GetProxyRuntimeSettings(context.Context, *GetProxyRuntimeSettingsRequest) (*GetProxyRuntimeSettingsResponse, error)
@@ -318,6 +331,9 @@ func (UnimplementedProxyRuntimeServiceServer) CheckProxyEdgeAccess(context.Conte
 }
 func (UnimplementedProxyRuntimeServiceServer) CheckProxyTargetConnectivity(context.Context, *CheckProxyTargetConnectivityRequest) (*CheckProxyTargetConnectivityResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CheckProxyTargetConnectivity not implemented")
+}
+func (UnimplementedProxyRuntimeServiceServer) GetProxyExitCheckSnapshot(context.Context, *GetProxyExitCheckSnapshotRequest) (*GetProxyExitCheckSnapshotResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetProxyExitCheckSnapshot not implemented")
 }
 func (UnimplementedProxyRuntimeServiceServer) ListProxyIPFraudProviders(context.Context, *ListProxyIPFraudProvidersRequest) (*ListProxyIPFraudProvidersResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListProxyIPFraudProviders not implemented")
@@ -574,6 +590,24 @@ func _ProxyRuntimeService_CheckProxyTargetConnectivity_Handler(srv interface{}, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProxyRuntimeService_GetProxyExitCheckSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetProxyExitCheckSnapshotRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProxyRuntimeServiceServer).GetProxyExitCheckSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProxyRuntimeService_GetProxyExitCheckSnapshot_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProxyRuntimeServiceServer).GetProxyExitCheckSnapshot(ctx, req.(*GetProxyExitCheckSnapshotRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ProxyRuntimeService_ListProxyIPFraudProviders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListProxyIPFraudProvidersRequest)
 	if err := dec(in); err != nil {
@@ -736,6 +770,10 @@ var ProxyRuntimeService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CheckProxyTargetConnectivity",
 			Handler:    _ProxyRuntimeService_CheckProxyTargetConnectivity_Handler,
+		},
+		{
+			MethodName: "GetProxyExitCheckSnapshot",
+			Handler:    _ProxyRuntimeService_GetProxyExitCheckSnapshot_Handler,
 		},
 		{
 			MethodName: "ListProxyIPFraudProviders",

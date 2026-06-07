@@ -350,6 +350,16 @@ message ProxyEdgeAccessCheck {
   string error_message = 7;
 }
 
+message ProxyExitCheckSnapshot {
+  string listener_id = 1;
+  ProxyExitIP proxy_exit_ip = 2;
+  ProxyExitGeo proxy_exit_geo = 3;
+  ProxyIPFraudCheck ip_fraud_check = 4;
+  ProxyEdgeAccessCheck edge_access_check = 5;
+  google.protobuf.Timestamp updated_at = 6;
+  google.protobuf.Timestamp expires_at = 7;
+}
+
 message ProxyEdgeCanarySettings {
   string url = 1;
   byte.v.forge.contracts.common.v1.SecretRef token_secret_ref = 2;
@@ -623,6 +633,9 @@ message CheckProxyTargetConnectivityRequest {
 }
 message CheckProxyTargetConnectivityResponse { ProxyTargetConnectivityCheck check = 1; }
 
+message GetProxyExitCheckSnapshotRequest { string listener_id = 1; }
+message GetProxyExitCheckSnapshotResponse { ProxyExitCheckSnapshot snapshot = 1; }
+
 message GetProxyRuntimeSettingsRequest {}
 message GetProxyRuntimeSettingsResponse { ProxyRuntimeSettings settings = 1; }
 message ListProxyIPFraudProvidersRequest {}
@@ -657,6 +670,7 @@ service ProxyRuntimeService {
   rpc CheckProxyIPFraud(CheckProxyIPFraudRequest) returns (CheckProxyIPFraudResponse);
   rpc CheckProxyEdgeAccess(CheckProxyEdgeAccessRequest) returns (CheckProxyEdgeAccessResponse);
   rpc CheckProxyTargetConnectivity(CheckProxyTargetConnectivityRequest) returns (CheckProxyTargetConnectivityResponse);
+  rpc GetProxyExitCheckSnapshot(GetProxyExitCheckSnapshotRequest) returns (GetProxyExitCheckSnapshotResponse);
   rpc ListProxyIPFraudProviders(ListProxyIPFraudProvidersRequest) returns (ListProxyIPFraudProvidersResponse);
   rpc ListProxyIPGeoProviders(ListProxyIPGeoProvidersRequest) returns (ListProxyIPGeoProvidersResponse);
   rpc GetProxyRuntimeSettings(GetProxyRuntimeSettingsRequest) returns (GetProxyRuntimeSettingsResponse);

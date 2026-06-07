@@ -360,6 +360,16 @@ export interface ProxyEdgeAccessCheck {
   error_message: string;
 }
 
+export interface ProxyExitCheckSnapshot {
+  listener_id: string;
+  proxy_exit_ip: ProxyExitIP | undefined;
+  proxy_exit_geo: ProxyExitGeo | undefined;
+  ip_fraud_check: ProxyIPFraudCheck | undefined;
+  edge_access_check: ProxyEdgeAccessCheck | undefined;
+  updated_at: string | undefined;
+  expires_at: string | undefined;
+}
+
 export interface ProxyEdgeCanarySettings {
   url: string;
   token_secret_ref: SecretRef | undefined;
@@ -637,6 +647,14 @@ export interface CheckProxyTargetConnectivityRequest {
 
 export interface CheckProxyTargetConnectivityResponse {
   check: ProxyTargetConnectivityCheck | undefined;
+}
+
+export interface GetProxyExitCheckSnapshotRequest {
+  listener_id: string;
+}
+
+export interface GetProxyExitCheckSnapshotResponse {
+  snapshot: ProxyExitCheckSnapshot | undefined;
 }
 
 export interface GetProxyRuntimeSettingsRequest {
