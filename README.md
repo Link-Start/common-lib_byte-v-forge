@@ -1,43 +1,30 @@
 # common-lib
 
-跨仓平台通用库：
+`common-lib` 是 byte-v-forge 的跨仓公共能力仓，沉淀稳定契约、基础设施 helper 和共享前端基础组件。
 
-- `proto/byte/v/forge/contracts/`：公开 proto 契约唯一源头，只放跨仓稳定公开建模和 gRPC service；内部/private/provider 细节不得进入本目录。
-  公开资源只暴露状态投影和 capability，不能暴露 password、token、cookie、provider raw shape 等可复用 secret；例如 mailbox 公开模型只提供 `credential_state`，真实凭据留在 mailbox 内部契约和存储。
-  `contracts/common/v1` 承载跨域复用的事件 metadata、secret/artifact 引用和通用错误等基础消息，业务事件引用它而不是重复定义。
-- `gen/go/byte/v/forge/contracts/`：公开契约的 Go message、client/server interface 生成物。
-- `ui/src/proto/byte/v/forge/contracts/`：公开契约的 TypeScript 类型，供前端模块通过 `@byte-v-forge/common-ui/proto/...` 消费。
-- `scripts/generate-python-proto.sh`：按需生成 Python proto/gRPC SDK；默认输出到忽略提交的 `gen/python/`，也可用 `OUT_DIR` 指定目标。
-- `envx`：轻量环境变量解析 helper；只覆盖当前跨仓重复的标量、列表、时长和 JSON map 读取。
-- `httpclient`：基础 `net/http` client 构造，统一超时、HTTP(S)/SOCKS proxy transport。
-- `proxyurl`：通用代理 URL 解析、脱敏、浏览器 proxy options 和上游 API 返回代理值收集。
-- `httpjson` / `httpx`：通用 JSON HTTP client、重试、响应读取、gzip、query/status/SSE helper。
-- `browserhttp`：基于 `tls-client` 的浏览器指纹 HTTP transport 封装，支持 TLS profile、proxy、cookie jar、header order hook。
-- `fingerprinthttp`：无业务语义的参数化指纹 HTTP client，统一 TLS profile、proxy、cookie、重试、JSON/form/body 请求和响应读取；具体指纹值由业务侧传入。
-- `browserfingerprint`：无业务语义的 Chromium/TLS profile、语言、UA、sec-ch-ua 指纹构造和选择 helper。
-- `jsonx` / `jwtx`：JSON map/path/deep key 读取、compact 编码和未验证 JWT payload/exp 解析。
-- `randx` / `redactx` / `stringx` / `emailx` / `hashx` / `pagex` / `timex`：crypto random、敏感文本/email 脱敏、稳定 hash、分页、时间解析和 context-aware sleep 等通用 helper。
-- `grpcclient`：内部明文 gRPC client 创建与 target 标准化 helper。
-- `dbclaim`：基于 GORM 的通用行级锁、租约 claim 字段更新和 lease 时间归一化 helper；业务仓保留状态机判断和数据所有权。
-- `gormx`：GORM 基础 helper，当前统一 conflict columns、do nothing、update columns/assignments 等 upsert 声明。
-- `grpchealth`：标准 gRPC Health Checking 注册 helper。
-- `redisx`：Redis URL client 初始化、optional/required client 创建、Redis keyspace 前缀归一化、带 namespace/TTL 的通用字符串 KV helper 和 Redis 分布式锁。
-- `eventbus` / `natseventbus` / `eventoutbox`：平台事件总线抽象、稳定事件 ID/标准 `EventMetadata` 构造、事件 extensions 构造、`EventEnvelope` proto 载荷编解码、通用 consumer worker、NATS JetStream 连接/stream 初始化、subject 合并、worker pull consumer 默认配置、适配和无业务语义的事务 outbox 编解码、PostgreSQL pgx/GORM 表操作、发布重试 helper；业务状态仍以各服务数据库为真源。
-- `protojsonx` / `protojsonhttp`：公开 proto JSON 编解码和 HTTP 读写 helper，统一 `UseProtoNames` / `DiscardUnknown` 策略。
-- `ui`：共享 React/shadcn dashboard uikit 包 `@byte-v-forge/common-ui`。
+## 核心能力
 
-## 分层与治理
+- 提供跨服务公开 proto 契约与 Go/TypeScript 生成物，作为平台公共模型和 gRPC service 的真源。
+- 提供无业务语义的通用库：HTTP/gRPC client、Redis、事件总线、outbox、分页、时间、随机、脱敏、JSON、proto JSON 等基础能力。
+- 提供共享 React/shadcn dashboard uikit 与通用数据驱动组件，支撑业务模块轻量装配页面。
+- 提供契约边界、事件 catalog 和破坏性变更检查脚本，辅助多仓协同演进。
 
-- 逻辑分层见 `docs/layers.md`。
-- `scripts/check-boundaries.sh` 检查公共库是否反向依赖业务仓、UI 是否导入 private/provider 路径、公开 proto 是否暴露 internal/private/provider namespace。
-- `scripts/check-proto-breaking.py --base origin/main` 检查公开 proto 的字段编号、字段名称/类型、枚举编号和 RPC 删除。
-- `scripts/check-event-catalog.py` 检查平台事件 catalog 的 subject、event name、payload type、owner、command durable 与重试语义。
-- `scripts/list-contract-consumers.py --source-root ..` 列出消费 common-lib 契约的 sibling 仓，用于规划跨仓契约迁移批次。
+## 边界
 
-## 生成
+本仓只放跨仓稳定能力，不承载 GPT、Mailbox、SMS、Proxy、Browser Automation 等业务流程、provider 分支、页面或私有状态机。业务仓通过发布包、proto/gRPC、HTTP 或事件边界消费公共能力。
+
+## 入口
+
+- 公共契约：`proto/byte/v/forge/contracts/`
+- Go 生成物：`gen/go/byte/v/forge/contracts/`
+- 共享前端包：`ui/`
+- 分层说明：`docs/layers.md`
+
+## 常用检查
 
 ```sh
 sh scripts/generate-proto.sh
 sh scripts/generate-web-proto.sh
-OUT_DIR=/tmp/byte-v-forge-python-proto sh scripts/generate-python-proto.sh browserautomation
+sh scripts/check-boundaries.sh
+git diff --check
 ```
